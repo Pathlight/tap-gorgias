@@ -1,7 +1,9 @@
+import json
 import requests
 import requests.exceptions
 import singer
 import time
+import urllib
 
 LOGGER = singer.get_logger()
 
@@ -16,7 +18,7 @@ class GorgiasAPI:
         self.subdomain = config['subdomain']
         self.base_url = self.URL_TEMPLATE.format(self.subdomain)
 
-    def get(self, url, params=None):
+    def get(self, url):
         if not url.startswith('https://'):
             url = f'{self.base_url}{url}'
 
