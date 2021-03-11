@@ -326,23 +326,27 @@
                 "array"
             ],
             "items":{
-                "name":{
-                    "type":[
-                        "null",
-                        "string"
-                    ]
-                },
-                "address":{
-                    "type":[
-                        "null",
-                        "string"
-                    ]
-                },
-                "type":{
-                    "type":[
-                        "null",
-                        "string"
-                    ]
+                "type": ["null", "object"],
+                "additionalProperties": false,
+                "properties": {
+                    "name":{
+                        "type":[
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "address":{
+                        "type":[
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "type":{
+                        "type":[
+                            "null",
+                            "string"
+                        ]
+                    }
                 }
             }
         },
@@ -410,48 +414,49 @@
                 "null",
                 "string"
             ],
-            "format": "date-time"
+            "format":"date-time"
         },
         "opened_datetime":{
             "type":[
                 "null",
                 "string"
             ],
-            "format": "date-time"
+            "format":"date-time"
         },
         "last_received_message_datetime":{
             "type":[
                 "null",
                 "string"
             ],
-            "format": "date-time"
+            "format":"date-time"
         },
         "last_message_datetime":{
             "type":[
                 "null",
                 "string"
             ],
-            "format": "date-time"
+            "format":"date-time"
         },
         "updated_datetime":{
             "type":[
                 "null",
                 "string"
-            ]
+            ],
+            "format":"date-time"
         },
         "closed_datetime":{
             "type":[
                 "null",
                 "string"
             ],
-            "format": "date-time"
+            "format":"date-time"
         },
         "snooze_datetime":{
             "type":[
                 "null",
                 "string"
             ],
-            "format": "date-time"
+            "format":"date-time"
         }
     }
 }

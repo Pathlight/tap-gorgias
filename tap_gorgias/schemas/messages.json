@@ -130,6 +130,33 @@
                             ]
                         }
                     }
+                },
+                "extra": {
+                    "type": [
+                        "null",
+                        "object"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                        "gmail_message_id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "page_id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "post_id": {
+                            "type": [
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
                 }
             }
         },
@@ -176,7 +203,14 @@
                         "object"
                     ],
                     "additionalProperties": false,
-                    "properties": {}
+                    "properties": {
+                        "name_set_via":{
+                            "type":[
+                                "null", 
+                                "string"
+                            ]
+                        }
+                    }
                 }
             }
         },
@@ -238,8 +272,14 @@
                 "meta": {
                     "type": [
                         "null",
-                        "string"
-                    ]
+                        "object"
+                    ],
+                    "additionalProperties": false,
+                    "properties":{
+                        "name_set_via":{
+                            "type": ["null", "string"]
+                        }
+                    }
                 }
             }
         },
@@ -461,6 +501,18 @@
                     ]
                 },
                 "X-Dmarc-Authentication-Bypass": {
+                    "type": [
+                        "null",
+                        "string"
+                    ]
+                },
+                "X-GORGIAS-TICKET-ID":{
+                    "type": [
+                        "null", 
+                        "string"
+                    ]
+                },
+                "reply-to":{
                     "type": [
                         "null",
                         "string"
