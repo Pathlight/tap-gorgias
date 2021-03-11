@@ -6,6 +6,10 @@ from singer import utils, metadata
 from singer.catalog import Catalog, CatalogEntry
 from singer.schema import Schema
 
+from .client import GorgiasAPI
+from .streams import STREAMS
+from .sync import sync_stream
+
 
 REQUIRED_CONFIG_KEYS = ["subdomain", "username", "password", "start_date"]
 LOGGER = singer.get_logger()
@@ -26,13 +30,64 @@ def load_schemas():
     return schemas
 
 
+def stream_is_selected(mdata):
+    return mdata.get((), {}).get('selected', False)
+
+
+def get_selected_streams(catalog):
+    selected_stream_names = []
+    for stream in catalog.streams:
+        mdata = metadata.to_map(stream.metadata)
+        if stream_is_selected(mdata):
+            selected_stream_names.append(stream.tap_stream_id)
+    return selected_stream_names
+
+
+def populate_class_schemas(catalog, selected_stream_names):
+    for stream in catalog.streams:
+        if stream.tap_stream_id in selected_stream_names:
+            STREAMS[stream.tap_stream_id].stream = stream
+
+
+def do_sync(client, catalog, state, config):
+    start_date = config['start_date']
+
+    selected_stream_names = get_selected_streams(catalog)
+    populate_class_schemas(catalog, selected_stream_names)
+
+    for stream in catalog.streams:
+        stream_name = stream.tap_stream_id
+        if stream_name not in selected_stream_names:
+            LOGGER.info("%s: Skipping - not selected", stream_name)
+            continue
+
+        singer.write_schema(
+            stream_name,
+            stream.schema.to_dict(),
+            stream.key_properties
+        )
+
+        LOGGER.info("%s: Starting sync", stream_name)
+        instance = STREAMS[stream_name](client, start_date)
+        counter_value = sync_stream(state, start_date, instance, config)
+        singer.write_state(state)
+        LOGGER.info("%s: Completed sync (%s rows)", stream_name, counter_value)
+
+    singer.write_state(state)
+    LOGGER.info("Finished sync")
+
+
 def discover():
     raw_schemas = load_schemas()
     streams = []
     for stream_id, schema in raw_schemas.items():
-        # TODO: populate any metadata and stream's key properties here..
-        stream_metadata = []
-        key_properties = []
+        key_properties = ['id']
+        stream_metadata = metadata.get_standard_metadata(
+            schema=schema.to_dict(),
+            key_properties=key_properties,
+            valid_replication_keys='updated_datetime',
+            replication_method=None
+        )
         streams.append(
             CatalogEntry(
                 tap_stream_id=stream_id,
@@ -67,7 +122,8 @@ def main():
             catalog = args.catalog
         else:
             catalog = discover()
-        sync(args.config, args.state, catalog)
+        client = GorgiasAPI(args.config)
+        do_sync(client, catalog, args.state, args.config)
 
 
 if __name__ == "__main__":

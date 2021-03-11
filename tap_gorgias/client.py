@@ -14,12 +14,11 @@ class GorgiasAPI:
         self.username = config['username']
         self.password = config['password']
         self.subdomain = config['subdomain']
-        self.tickets_view_id = config['tickets_view_id']
         self.base_url = self.URL_TEMPLATE.format(self.subdomain)
 
     def get(self, url, params=None):
         if not url.startswith('https://'):
-            url = f'{self.base_url}/{url}'
+            url = f'{self.base_url}{url}'
 
         for num_retries in range(self.MAX_RETRIES):
             LOGGER.info(f'gorgias get request {url}')
