@@ -12,6 +12,9 @@ from .sync import sync_stream
 
 
 REQUIRED_CONFIG_KEYS = ["subdomain", "username", "password", "start_date"]
+SUB_STREAMS = {
+    'tickets': ['messages']
+}
 LOGGER = singer.get_logger()
 
 
@@ -43,6 +46,31 @@ def get_selected_streams(catalog):
     return selected_stream_names
 
 
+def get_sub_stream_names():
+    sub_stream_names = []
+    for parent_stream in SUB_STREAMS:
+        sub_stream_names.extend(SUB_STREAMS[parent_stream])
+    return sub_stream_names
+
+
+class DependencyException(Exception):
+    pass
+
+
+def validate_dependencies(selected_stream_ids):
+    errs = []
+    msg_tmpl = ("Unable to extract {0} data. "
+                "To receive {0} data, you also need to select {1}.")
+    for parent_stream_name in SUB_STREAMS:
+        sub_stream_names = SUB_STREAMS[parent_stream_name]
+        for sub_stream_name in sub_stream_names:
+            if sub_stream_name in selected_stream_ids and parent_stream_name not in selected_stream_ids:
+                errs.append(msg_tmpl.format(sub_stream_name, parent_stream_name))
+
+    if errs:
+        raise DependencyException(" ".join(errs))
+
+
 def populate_class_schemas(catalog, selected_stream_names):
     for stream in catalog.streams:
         if stream.tap_stream_id in selected_stream_names:
@@ -53,7 +81,9 @@ def do_sync(client, catalog, state, config):
     start_date = config['start_date']
 
     selected_stream_names = get_selected_streams(catalog)
+    validate_dependencies(selected_stream_names)
     populate_class_schemas(catalog, selected_stream_names)
+    all_sub_stream_names = get_sub_stream_names()
 
     for stream in catalog.streams:
         stream_name = stream.tap_stream_id
@@ -66,6 +96,23 @@ def do_sync(client, catalog, state, config):
             stream.schema.to_dict(),
             stream.key_properties
         )
+
+        sub_stream_names = SUB_STREAMS.get(stream_name)
+        if sub_stream_names:
+            for sub_stream_name in sub_stream_names:
+                if sub_stream_name not in selected_stream_names:
+                    continue
+                sub_instance = STREAMS[sub_stream_name]
+                sub_stream = STREAMS[sub_stream_name].stream
+                singer.write_schema(
+                    sub_stream.tap_stream_id,
+                    sub_stream.schema.to_dict(),
+                    sub_instance.key_properties
+                )
+
+        # parent stream will sync sub stream
+        if stream_name in all_sub_stream_names:
+            continue
 
         LOGGER.info("%s: Starting sync", stream_name)
         instance = STREAMS[stream_name](client, start_date)
@@ -82,10 +129,15 @@ def discover():
     streams = []
     for stream_id, schema in raw_schemas.items():
         key_properties = ['id']
+        valid_replication_keys = []
+        if stream_id == 'messages':
+            valid_replication_keys.append('created_datetime')
+        elif stream_id == 'tickets':
+            valid_replication_keys.append('updated_datetime')
         stream_metadata = metadata.get_standard_metadata(
             schema=schema.to_dict(),
             key_properties=key_properties,
-            valid_replication_keys='updated_datetime',
+            valid_replication_keys=valid_replication_keys,
             replication_method=None
         )
         streams.append(
