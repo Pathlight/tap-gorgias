@@ -108,6 +108,12 @@
                                 "null",
                                 "string"
                             ]
+                        },
+                        "profile_picture_url":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
                         }
                     }
                 }
@@ -162,6 +168,12 @@
                                 "null",
                                 "string"
                             ]
+                        },
+                        "profile_picture_url":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
                         }
                     }
                 }
@@ -212,6 +224,12 @@
                     "additionalProperties":false,
                     "properties":{
                         "name_set_via":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "profile_picture_url":{
                             "type":[
                                 "null",
                                 "string"
@@ -326,9 +344,12 @@
                 "array"
             ],
             "items":{
-                "type": ["null", "object"],
-                "additionalProperties": false,
-                "properties": {
+                "type":[
+                    "null",
+                    "object"
+                ],
+                "additionalProperties":false,
+                "properties":{
                     "name":{
                         "type":[
                             "null",

@@ -1,600 +1,483 @@
 {
-    "type": [
+    "type":[
         "null",
         "object"
     ],
-    "additionalProperties": false,
-    "properties": {
-        "id": {
-            "type": [
+    "additionalProperties":false,
+    "properties":{
+        "id":{
+            "type":[
                 "null",
                 "integer"
             ]
         },
-        "uri": {
-            "type": [
+        "uri":{
+            "type":[
                 "null",
                 "string"
             ]
         },
-        "message_id": {
-            "type": [
+        "external_id":{
+            "type":[
                 "null",
                 "string"
             ]
         },
-        "ticket_id": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "external_id": {
-            "type": [
+        "language":{
+            "type":[
                 "null",
                 "string"
             ]
         },
-        "public": {
-            "type": [
+        "status":{
+            "type":[
+                "null",
+                "string"
+            ]
+        },
+        "priority":{
+            "type":[
+                "null",
+                "string"
+            ]
+        },
+        "channel":{
+            "type":[
+                "null",
+                "string"
+            ]
+        },
+        "via":{
+            "type":[
+                "null",
+                "string"
+            ]
+        },
+        "from_agent":{
+            "type":[
                 "null",
                 "boolean"
             ]
         },
-        "channel": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "via": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "source": {
-            "type": [
+        "requester":{
+            "type":[
                 "null",
                 "object"
             ],
-            "additionalProperties": false,
-            "properties": {
-                "type": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "to": {
-                    "type": [
-                        "null",
-                        "array"
-                    ],
-                    "items": {
-                        "name": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        },
-                        "address": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        }
-                    }
-                },
-                "cc": {
-                    "type": [
-                        "null",
-                        "array"
-                    ],
-                    "items": {
-                        "type": [
-                            "null",
-                            "string"
-                        ]
-                    }
-                },
-                "bcc": {
-                    "type": [
-                        "null",
-                        "array"
-                    ],
-                    "items": {
-                        "type": [
-                            "null",
-                            "string"
-                        ]
-                    }
-                },
-                "from": {
-                    "type": [
-                        "null",
-                        "object"
-                    ],
-                    "additionalProperties": false,
-                    "properties": {
-                        "name": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        },
-                        "address": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        }
-                    }
-                },
-                "extra": {
-                    "type": [
-                        "null",
-                        "object"
-                    ],
-                    "additionalProperties": false,
-                    "properties": {
-                        "gmail_message_id": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        },
-                        "page_id": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        },
-                        "post_id": {
-                            "type": [
-                                "null",
-                                "string"
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "sender": {
-            "type": [
-                "null",
-                "object"
-            ],
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "type": [
+            "additionalProperties":false,
+            "properties":{
+                "id":{
+                    "type":[
                         "null",
                         "integer"
                     ]
                 },
-                "email": {
-                    "type": [
+                "email":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "name": {
-                    "type": [
+                "name":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "firstname": {
-                    "type": [
+                "firstname":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "lastname": {
-                    "type": [
+                "lastname":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "meta": {
-                    "type": [
+                "meta":{
+                    "type":[
                         "null",
                         "object"
                     ],
-                    "additionalProperties": false,
-                    "properties": {
-                        "name_set_via":{
-                            "type":[
-                                "null", 
-                                "string"
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "integration_id": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "rule_id": {
-            "type": [
-                "null",
-                "integer"
-            ]
-        },
-        "from_agent": {
-            "type": [
-                "null",
-                "boolean"
-            ]
-        },
-        "receiver": {
-            "type": [
-                "null",
-                "object"
-            ],
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "type": [
-                        "null",
-                        "integer"
-                    ]
-                },
-                "email": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "name": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "firstname": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "lastname": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "meta": {
-                    "type": [
-                        "null",
-                        "object"
-                    ],
-                    "additionalProperties": false,
+                    "additionalProperties":false,
                     "properties":{
                         "name_set_via":{
-                            "type": ["null", "string"]
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "profile_picture_url":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
                         }
                     }
                 }
             }
         },
-        "subject": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "body_text": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "body_html": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "stripped_text": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "stripped_html": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "stripped_signature": {
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        "headers": {
-            "type": [
+        "customer":{
+            "type":[
                 "null",
                 "object"
             ],
-            "additionalProperties": false,
-            "properties": {
-                "To": {
-                    "type": [
+            "additionalProperties":false,
+            "properties":{
+                "id":{
+                    "type":[
+                        "null",
+                        "integer"
+                    ]
+                },
+                "email":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "Date": {
-                    "type": [
+                "name":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "From": {
-                    "type": [
+                "firstname":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "Subject": {
-                    "type": [
+                "lastname":{
+                    "type":[
                         "null",
                         "string"
                     ]
                 },
-                "X-Sieve": {
-                    "type": [
+                "meta":{
+                    "type":[
                         "null",
-                        "string"
-                    ]
-                },
-                "Received": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Orig-To": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "Message-Id": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "References": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Received": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "In-Reply-To": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "Return-Path": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Spam-Flag": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "Content-Type": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "Delivered-To": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "Mime-Version": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Spam-Score": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "Dkim-Signature": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Envelope-From": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Virus-Scanned": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Originating-Ip": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Spam-Threshold": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Suspicious-Flag": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Gm-Message-State": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Mailgun-Incoming": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Classification-Id": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Google-Smtp-Source": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Google-Dkim-Signature": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Sieve-Redirected-From": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-Dmarc-Authentication-Bypass": {
-                    "type": [
-                        "null",
-                        "string"
-                    ]
-                },
-                "X-GORGIAS-TICKET-ID":{
-                    "type": [
-                        "null", 
-                        "string"
-                    ]
-                },
-                "reply-to":{
-                    "type": [
-                        "null",
-                        "string"
-                    ]
+                        "object"
+                    ],
+                    "additionalProperties":false,
+                    "properties":{
+                        "name_set_via":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "profile_picture_url":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
                 }
             }
         },
-        "attachments": {
-            "type": [
-                "null",
-                "array"
-            ],
-            "items":{
-                "type": ["null", "string"]
-            }
-        },
-        "actions": {
-            "type": [
-                "null",
-                "array"
-            ],
-            "items":{
-                "type": ["null", "string"]
-            }
-        },
-        "macros": {
-            "type": [
-                "null",
-                "array"
-            ],
-            "items": {
-                "type": [
-                    "null",
-                    "string"
-                ]
-            }
-        },
-        "meta": {
-            "type": [
+        "assignee_user":{
+            "type":[
                 "null",
                 "object"
+            ],
+            "additionalProperties":false,
+            "properties":{
+                "id":{
+                    "type":[
+                        "null",
+                        "integer"
+                    ]
+                },
+                "email":{
+                    "type":[
+                        "null",
+                        "string"
+                    ]
+                },
+                "name":{
+                    "type":[
+                        "null",
+                        "string"
+                    ]
+                },
+                "firstname":{
+                    "type":[
+                        "null",
+                        "string"
+                    ]
+                },
+                "lastname":{
+                    "type":[
+                        "null",
+                        "string"
+                    ]
+                },
+                "meta":{
+                    "type":[
+                        "null",
+                        "object"
+                    ],
+                    "additionalProperties":false,
+                    "properties":{
+                        "name_set_via":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "profile_picture_url":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "assignee_team":{
+            "type":[
+                "null",
+                "object"
+            ],
+            "additionalProperties":false,
+            "properties":{
+                "id":{
+                    "type":[
+                        "null",
+                        "integer"
+                    ]
+                },
+                "name":{
+                    "type":[
+                        "null",
+                        "string"
+                    ]
+                },
+                "decoration":{
+                    "type":[
+                        "null",
+                        "object"
+                    ],
+                    "additionalProperties":false,
+                    "properties":{
+                        "emoji":{
+                            "type":[
+                                "null",
+                                "object"
+                            ],
+                            "additionalProperties":false,
+                            "properties":{
+                                "id":{
+                                    "type":[
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "name":{
+                                    "type":[
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "skin":{
+                                    "type":[
+                                        "null",
+                                        "integer"
+                                    ]
+                                },
+                                "colons":{
+                                    "type":[
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "native":{
+                                    "type":[
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "unified":{
+                                    "type":[
+                                        "null",
+                                        "string"
+                                    ]
+                                },
+                                "emoticons":{
+                                    "type":[
+                                        "null",
+                                        "array"
+                                    ],
+                                    "items":{
+                                        "type":[
+                                            "null",
+                                            "string"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "subject":{
+            "type":[
+                "null",
+                "string"
             ]
         },
-        "created_datetime": {
-            "type": [
+        "excerpt":{
+            "type":[
                 "null",
                 "string"
             ]
         },
-        "sent_datetime": {
-            "type": [
+        "integrations":{
+            "type":[
                 "null",
-                "string"
+                "array"
             ],
-            "format": "date-time"
+            "items":{
+                "type":[
+                    "null",
+                    "object"
+                ],
+                "additionalProperties":false,
+                "properties":{
+                    "name":{
+                        "type":[
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "address":{
+                        "type":[
+                            "null",
+                            "string"
+                        ]
+                    },
+                    "type":{
+                        "type":[
+                            "null",
+                            "string"
+                        ]
+                    }
+                }
+            }
         },
-        "failed_datetime": {
-            "type": [
-                "null",
-                "string"
-            ],
-            "format": "date-time"
-        },
-        "deleted_datetime": {
-            "type": [
-                "null",
-                "string"
-            ],
-            "format": "date-time"
-        },
-        "opened_datetime": {
-            "type": [
-                "null",
-                "string"
-            ],
-            "format": "date-time"
-        },
-        "last_sending_error": {
-            "type": [
+        "meta":{
+            "type":[
                 "null",
                 "string"
             ]
+        },
+        "tags":{
+            "type":[
+                "null",
+                "array"
+            ],
+            "items":{
+                "id":{
+                    "type":[
+                        "null",
+                        "integer"
+                    ]
+                },
+                "name":{
+                    "type":[
+                        "null",
+                        "string"
+                    ]
+                },
+                "uri":{
+                    "type":[
+                        "null",
+                        "string"
+                    ]
+                },
+                "decoration":{
+                    "type":[
+                        "null",
+                        "object"
+                    ],
+                    "additionalProperties":false,
+                    "properties":{
+                        "color":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "messages_count":{
+            "type":[
+                "null",
+                "integer"
+            ]
+        },
+        "is_unread":{
+            "type":[
+                "null",
+                "boolean"
+            ]
+        },
+        "created_datetime":{
+            "type":[
+                "null",
+                "string"
+            ],
+            "format":"date-time"
+        },
+        "opened_datetime":{
+            "type":[
+                "null",
+                "string"
+            ],
+            "format":"date-time"
+        },
+        "last_received_message_datetime":{
+            "type":[
+                "null",
+                "string"
+            ],
+            "format":"date-time"
+        },
+        "last_message_datetime":{
+            "type":[
+                "null",
+                "string"
+            ],
+            "format":"date-time"
+        },
+        "updated_datetime":{
+            "type":[
+                "null",
+                "string"
+            ],
+            "format":"date-time"
+        },
+        "closed_datetime":{
+            "type":[
+                "null",
+                "string"
+            ],
+            "format":"date-time"
+        },
+        "snooze_datetime":{
+            "type":[
+                "null",
+                "string"
+            ],
+            "format":"date-time"
         }
     }
 }
