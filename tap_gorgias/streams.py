@@ -121,7 +121,6 @@ class Messages(Stream):
                 yield record
 
             total_pages = data.get('meta').get('nb_pages') or total_pages
-            print('\n\n\nTOTAL MESSAGE PAGES', total_pages, '\n\n\n')
             next_page += 1
 
     def sync(self, ticket_id, sync_thru):
@@ -151,7 +150,6 @@ class SatisfactionSurveys(Stream):
         total_pages = 1
 
         while next_page <= total_pages:
-            print('***LOOP', next_page)
             data = self.client.get(url.format(next_page))
 
             for record in data.get(self.results_key):
