@@ -30,8 +30,9 @@ This tap:
     id = resp['id']
     ```
     Then add this ID to the config as `tickets_view_id` and you're all set!
-
-  - TBD: [Satisfaction Ratings]()
+  - [Ticket Messages](https://developers.gorgias.com/reference#ticket-messages)
+    - Note that this is a substream of tickets
+  - [Satisfaction Surveys](https://developers.gorgias.com/reference#satisfaction-surveys)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
 
