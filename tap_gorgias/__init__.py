@@ -91,28 +91,32 @@ def do_sync(client, catalog, state, config):
             LOGGER.info("%s: Skipping - not selected", stream_name)
             continue
 
+        sub_stream_names = SUB_STREAMS.get(stream_name)
+
+        # parent stream will sync sub stream
+        if stream_name in all_sub_stream_names:
+            print('continuing on to parent')
+            continue
+
         singer.write_schema(
             stream_name,
             stream.schema.to_dict(),
             stream.key_properties
         )
 
-        sub_stream_names = SUB_STREAMS.get(stream_name)
         if sub_stream_names:
             for sub_stream_name in sub_stream_names:
                 if sub_stream_name not in selected_stream_names:
                     continue
                 sub_instance = STREAMS[sub_stream_name]
                 sub_stream = STREAMS[sub_stream_name].stream
+                sub_stream_schema = sub_stream.schema.to_dict()
+                print('public in substream', 'public' in sub_stream_schema['properties'])
                 singer.write_schema(
                     sub_stream.tap_stream_id,
                     sub_stream.schema.to_dict(),
                     sub_instance.key_properties
                 )
-
-        # parent stream will sync sub stream
-        if stream_name in all_sub_stream_names:
-            continue
 
         LOGGER.info("%s: Starting sync", stream_name)
         instance = STREAMS[stream_name](client, start_date)
@@ -130,7 +134,7 @@ def discover():
     for stream_id, schema in raw_schemas.items():
         key_properties = ['id']
         valid_replication_keys = []
-        if stream_id == 'messages':
+        if stream_id in ['messages', 'satisfaction_survey']:
             valid_replication_keys.append('created_datetime')
         elif stream_id == 'tickets':
             valid_replication_keys.append('updated_datetime')
