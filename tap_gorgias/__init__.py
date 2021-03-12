@@ -95,7 +95,6 @@ def do_sync(client, catalog, state, config):
 
         # parent stream will sync sub stream
         if stream_name in all_sub_stream_names:
-            print('continuing on to parent')
             continue
 
         singer.write_schema(
@@ -111,7 +110,6 @@ def do_sync(client, catalog, state, config):
                 sub_instance = STREAMS[sub_stream_name]
                 sub_stream = STREAMS[sub_stream_name].stream
                 sub_stream_schema = sub_stream.schema.to_dict()
-                print('public in substream', 'public' in sub_stream_schema['properties'])
                 singer.write_schema(
                     sub_stream.tap_stream_id,
                     sub_stream.schema.to_dict(),
