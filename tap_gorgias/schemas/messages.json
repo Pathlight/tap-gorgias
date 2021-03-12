@@ -225,17 +225,8 @@
                 "meta":{
                     "type":[
                         "null",
-                        "object"
-                    ],
-                    "additionalProperties":false,
-                    "properties":{
-                        "name_set_via":{
-                            "type":[
-                                "null",
-                                "string"
-                            ]
-                        }
-                    }
+                        "string"
+                    ]
                 }
             }
         },
@@ -285,7 +276,13 @@
             "type":[
                 "null",
                 "array"
-            ]
+            ],
+            "items":{
+                "type": [
+                    "null",
+                    "string"
+                ]
+            }
         },
         "meta":{
             "type":[
