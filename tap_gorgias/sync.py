@@ -8,7 +8,6 @@ LOGGER = singer.get_logger()
 
 def sync_stream(state, start_date, instance, config):
     stream = instance.stream
-    stream_schema = stream.schema.to_dict()
     mdata = stream.metadata
 
     # If we have a bookmark, use it; otherwise use start_date & update bookmark with it
@@ -27,7 +26,7 @@ def sync_stream(state, start_date, instance, config):
                 counter.increment()
 
             with singer.Transformer() as transformer:
-                rec = transformer.transform(record, stream_schema, metadata=metadata.to_map(mdata))
+                rec = transformer.transform(record, stream.schema.to_dict(), metadata=metadata.to_map(mdata))
             singer.write_record(stream.tap_stream_id, rec)
             # NB: We will only write state at the end of a stream's sync:
             #  We may find out that there exists a sync that takes too long and can never emit a bookmark
