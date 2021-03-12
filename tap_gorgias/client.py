@@ -34,10 +34,10 @@ class GorgiasAPI:
                 if resp.status_code == 429 and num_retries < self.MAX_RETRIES:
                     retry_after = resp.headers['Retry-after']
                     LOGGER.info('api query gorgias rate limit', extra={
-                        'retry_after': int(retry_after),
+                        'retry_after': retry_after,
                         'subdomain': self.subdomain
                     })
-                    time.sleep(retry_after)
+                    time.sleep(int(retry_after))
                 elif resp.status_code >= 500 and num_retries < self.MAX_RETRIES:
                     LOGGER.info('api query gorgias 5xx error', extra={
                         'subdomain': self.subdomain
