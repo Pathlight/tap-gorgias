@@ -74,7 +74,6 @@ class Tickets(Stream):
             sync_thru = singer.get_bookmark(state, self.name, self.replication_key)
         except TypeError:
             sync_thru = self.start_date
-        sync_thru = self.transform_value('date', sync_thru)
 
         max_synced_thru = max(sync_thru, self.start_date)
 
@@ -127,10 +126,11 @@ class Messages(Stream):
         url = self.url.format(ticket_id)
         for row in self.paging_get(url):
             message = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            if message['created_datetime'] < sync_thru:
-                yield(self.stream, message)
-            else:
-                break
+            # going to retrieve all messages for each ticket regardless
+            # of when the message was sent to ensure we have a complete
+            # list (including first response time) just in case.
+            # if this slows things down we can revisit
+            yield(self.stream, message)
 
 
 class SatisfactionSurveys(Stream):
