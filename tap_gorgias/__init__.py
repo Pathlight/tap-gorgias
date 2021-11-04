@@ -79,11 +79,14 @@ def populate_class_schemas(catalog, selected_stream_names):
 
 def do_sync(client, catalog, state, config):
     start_date = config['start_date']
+    subdomain = config['subdomain']
 
     selected_stream_names = get_selected_streams(catalog)
     validate_dependencies(selected_stream_names)
     populate_class_schemas(catalog, selected_stream_names)
     all_sub_stream_names = get_sub_stream_names()
+
+    LOGGER.info(f"Start run subdomain={subdomain}")
 
     for stream in catalog.streams:
         stream_name = stream.tap_stream_id
@@ -116,14 +119,14 @@ def do_sync(client, catalog, state, config):
                     sub_instance.key_properties
                 )
 
-        LOGGER.info("%s: Starting sync", stream_name)
+        LOGGER.info(f"Start sync subdomain={subdomain} stream={stream_name} start_date='{start_date}'")
         instance = STREAMS[stream_name](client, start_date)
         counter_value = sync_stream(state, start_date, instance, config)
         singer.write_state(state)
-        LOGGER.info("%s: Completed sync (%s rows)", stream_name, counter_value)
+        LOGGER.info(f"Finish sync subdomain={subdomain} stream={stream_name} start_date='{start_date}' count={counter_value}")
 
     singer.write_state(state)
-    LOGGER.info("Finished sync")
+    LOGGER.info(f"Finish run subdomain={subdomain}")
 
 
 def discover():

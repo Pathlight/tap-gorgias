@@ -49,7 +49,7 @@ class Tickets(Stream):
     replication_key = 'updated_datetime'
     view_id_key = 'tickets_view_id'
     datetime_fields = set([
-        'updated_datime', 'created_datetime', 'opened_datetime', 
+        'updated_datime', 'created_datetime', 'opened_datetime',
         'last_received_message_datetime', 'last_message_datetime', 'closed_datetime',
         'snooze_datetime'
     ])

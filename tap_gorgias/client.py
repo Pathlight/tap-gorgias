@@ -23,7 +23,7 @@ class GorgiasAPI:
             url = f'{self.base_url}{url}'
 
         for num_retries in range(self.MAX_RETRIES):
-            LOGGER.info(f'gorgias get request {url}')
+            LOGGER.info(f'gorgias get request url="{url}"')
             resp = requests.get(
                 url,
                 auth=(self.username, self.password)
