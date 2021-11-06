@@ -20,7 +20,7 @@ This tap:
         "start_date": "2021-03-01T00:00:00.000000Z",
     }
 
-    client = GorgiasAPI(config) 
+    client = GorgiasAPI(config)
     url = "https://4patriots.gorgias.com/api/views"
 
     payload = {
@@ -42,7 +42,3 @@ This tap:
   - [Satisfaction Surveys](https://developers.gorgias.com/reference#satisfaction-surveys)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
-
----
-
-Copyright &copy; 2018 Stitch
