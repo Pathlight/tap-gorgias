@@ -3,14 +3,13 @@ import requests
 import requests.exceptions
 import singer
 import time
-import urllib
 
 LOGGER = singer.get_logger()
 
 
 class GorgiasAPI:
-    URL_TEMPLATE = 'https://{}.gorgias.com'
-    MAX_RETRIES = 10
+    URL_TEMPLATE = "https://{}.gorgias.com"
+    MAX_RETRIES = 5
 
     def __init__(self, config):
         self.username = config["username"]
@@ -24,11 +23,7 @@ class GorgiasAPI:
             url = f"{self.base_url}{url}"
 
         for num_retries in range(self.MAX_RETRIES):
-            LOGGER.info(f'gorgias get request url="{url}"')
-            resp = requests.get(
-                url,
-                auth=(self.username, self.password)
-            )
+            resp = requests.get(url, auth=(self.username, self.password))
             try:
                 resp.raise_for_status()
             except requests.exceptions.RequestException:
@@ -51,6 +46,16 @@ class GorgiasAPI:
             if resp and resp.status_code == 200:
                 break
 
+        resp_json = resp.json()
+        try:
+            if resp_json.get('meta') and resp_json.get('meta').get('item_count'):
+                count = resp.json().get('meta').get('item_count')
+            else:
+                count = len(resp_json.get('data'))
+        except:
+            count = None
+
+        LOGGER.info(f'gorgias get request url="{url}" count_returned={count}')
         return resp.json()
 
     def post(self, url, params):
