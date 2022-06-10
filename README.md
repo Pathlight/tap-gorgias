@@ -20,8 +20,8 @@ This tap:
         "start_date": "2021-03-01T00:00:00.000000Z",
     }
 
-    client = GorgiasAPI(config) 
-    url = "https://4patriots.gorgias.com/api/views"
+    client = GorgiasAPI(config)
+    url = "https://{config['subdomain']}.gorgias.com/api/views"
 
     payload = {
         "category": "ticket-list",
@@ -40,9 +40,10 @@ This tap:
   - [Ticket Messages](https://developers.gorgias.com/reference#ticket-messages)
     - Note that this is a substream of tickets
   - [Satisfaction Surveys](https://developers.gorgias.com/reference#satisfaction-surveys)
+  - [Events](https://developers.gorgias.com/reference/get_api-events)
 - Outputs the schema for each resource
 - Incrementally pulls data based on the input state
 
 ---
 
-Copyright &copy; 2018 Stitch
+Copyright &copy; 2021 Pathlight
