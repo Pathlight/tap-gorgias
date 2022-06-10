@@ -44,7 +44,7 @@ class GorgiasAPI:
                     })
                     time.sleep(10)
                 else:
-                    raise Exception(f'gorgias query error: {resp.status_code}')
+                    raise Exception(f'gorgias query error: {resp.status_code}', resp.text)
 
             if resp and resp.status_code == 200:
                 break
