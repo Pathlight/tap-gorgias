@@ -49,7 +49,7 @@ class Tickets(Stream):
     replication_key = 'updated_datetime'
     view_id_key = 'tickets_view_id'
     datetime_fields = set([
-        'updated_datime', 'created_datetime', 'opened_datetime', 
+        'updated_datime', 'created_datetime', 'opened_datetime',
         'last_received_message_datetime', 'last_message_datetime', 'closed_datetime',
         'snooze_datetime'
     ])
@@ -181,7 +181,61 @@ class SatisfactionSurveys(Stream):
         self.update_bookmark(state, max_synced_thru)
 
 
+class Events(Stream):
+    name = 'events'
+    replication_method = 'INCREMENTAL'
+    replication_key = 'created_datetime'
+    key_properties = ['id']
+    url = '/api/events?limit=100&order_by=created_datetime:asc'
+    datetime_fields = set([
+        'created_datetime',
+    ])
+    results_key = 'data'
+
+    def cursor_get(self, url, bookmark_date):
+        """ Paginate through the events list response via the provided cursors. """
+        cursors_seen = set()
+        url = f'{url}&created_datetime[gt]={bookmark_date}'
+        def _get_page(cursor=None):
+            cursors_seen.add(cursor)
+            if not cursor:
+                return self.client.get(url)
+            return self.client.get(f'{url}&cursor={cursor}')
+
+        next_cursor = None
+        while next_cursor not in cursors_seen:
+            # pass an empty cursor to begin
+            data = _get_page(next_cursor)
+            for record in data.get(self.results_key):
+                yield record
+            next_cursor = data['meta'].get('next_cursor')
+
+    def sync(self, state, config):
+        try:
+            sync_thru = singer.get_bookmark(state, self.name, self.replication_key)
+        except TypeError:
+            sync_thru = self.start_date
+
+        sync_thru = self.transform_value('date', sync_thru)
+
+        max_synced_thru = max(sync_thru, self.start_date)
+
+        # surveys are retrieved in descending order based on created_datetime
+        # with no date filtering
+        for row in self.cursor_get(self.url, sync_thru):
+            event = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru = event[self.replication_key]
+            max_synced_thru = max(curr_synced_thru, max_synced_thru)
+            if curr_synced_thru > sync_thru:
+                yield(self.stream, event)
+            else:
+                break
+
+        self.update_bookmark(state, max_synced_thru)
+
+
 STREAMS = {
+    "events": Events,
     "tickets": Tickets,
     "messages": Messages,
     "satisfaction_surveys": SatisfactionSurveys

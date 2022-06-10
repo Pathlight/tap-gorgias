@@ -3,10 +3,10 @@ from setuptools import setup
 
 setup(
     name="tap-gorgias",
-    version="0.1.4",
-    description="Singer.io tap for extracting data",
-    author="Stitch",
-    url="http://singer.io",
+    version="0.1.5",
+    description="Singer.io tap for extracting data from the Gorgias API",
+    author="Pathlight",
+    url="https://www.pathlight.com/",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_gorgias"],
     install_requires=[
