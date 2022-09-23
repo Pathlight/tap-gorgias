@@ -62,7 +62,8 @@ class GorgiasAPI:
         resp = requests.post(
             url,
             json=params,
-            auth=(self.username, self.password)
+            auth=(self.username, self.password),
+            timeout=DEFAULT_TIMEOUT
         )
 
         return resp.json()
