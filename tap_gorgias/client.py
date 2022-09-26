@@ -1,12 +1,14 @@
 import json
 import requests
 import requests.exceptions
+import os
 import singer
 import time
 import urllib
 
 LOGGER = singer.get_logger()
 
+DEFAULT_TIMEOUT = os.getenv('DEFAULT_HTTP_TIMEOUT')
 
 class GorgiasAPI:
     URL_TEMPLATE = 'https://{}.gorgias.com'
@@ -23,10 +25,11 @@ class GorgiasAPI:
             url = f'{self.base_url}{url}'
 
         for num_retries in range(self.MAX_RETRIES):
-            LOGGER.info(f'gorgias get request {url}')
+            LOGGER.info(f'gorgias get request {url}, timeout={DEFAULT_TIMEOUT}')
             resp = requests.get(
                 url,
-                auth=(self.username, self.password)
+                auth=(self.username, self.password),
+                timeout=DEFAULT_TIMEOUT
             )
             try:
                 resp.raise_for_status()
@@ -59,7 +62,8 @@ class GorgiasAPI:
         resp = requests.post(
             url,
             json=params,
-            auth=(self.username, self.password)
+            auth=(self.username, self.password),
+            timeout=DEFAULT_TIMEOUT
         )
 
         return resp.json()
