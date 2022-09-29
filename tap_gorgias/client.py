@@ -8,7 +8,11 @@ import urllib
 
 LOGGER = singer.get_logger()
 
-DEFAULT_TIMEOUT = os.getenv('DEFAULT_HTTP_TIMEOUT') and int(os.getenv('DEFAULT_HTTP_TIMEOUT'))
+timeout = os.getenv('DEFAULT_HTTP_TIMEOUT')
+try:
+    DEFAULT_TIMEOUT = int(timeout) if timeout else None
+except (TypeError, ValueError):
+    DEFAULT_TIMEOUT = None
 
 class GorgiasAPI:
     URL_TEMPLATE = 'https://{}.gorgias.com'
