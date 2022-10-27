@@ -63,6 +63,9 @@ class Tickets(Stream):
             for record in data[self.results_key]:
                 yield record
             url = data['meta']['next_items']
+            LOGGER.info(f'next url for GET: {url}')
+            if not url:
+                break
 
     def sync(self, state, config):
         view_id = config.get(self.view_id_key)
@@ -80,6 +83,8 @@ class Tickets(Stream):
         messages_stream = Messages(self.client)
 
         url = self.url.format(view_id)
+
+        LOGGER.info(f'starting url for Paging GET: {url}')
 
         # tickets are retrieved in descending order based on updated_datetime
         # with no date filtering
