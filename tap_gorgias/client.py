@@ -25,6 +25,10 @@ class GorgiasAPI:
         self.base_url = self.URL_TEMPLATE.format(self.subdomain)
 
     def get(self, url):
+        if not url:
+            LOGGER.info(f'gorgias get request attempted, but no url passed through')
+            return {}
+
         if not url.startswith('https://'):
             url = f'{self.base_url}{url}'
 
@@ -59,6 +63,9 @@ class GorgiasAPI:
         return resp.json()
 
     def post(self, url, params):
+        if not url:
+            LOGGER.info(f'gorgias post request attempted, but no url passed through')
+            return {}
 
         if not url.startswith('https://'):
             url = f'{self.base_url}/{url}'
