@@ -143,11 +143,11 @@ class Tickets(CursorStream):
         }
         LOGGER.info(f'Starting fetch for {self.name} stopping at {sync_thru}')
         for row in self.cursor_get(self.url, query_params):
-            message = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            curr_synced_thru: str = message[self.replication_key]
+            ticket = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru: str = ticket[self.replication_key]
             max_synced_thru = max(curr_synced_thru, max_synced_thru)
             if curr_synced_thru > sync_thru:
-                yield(self.stream, message)
+                yield(self.stream, ticket)
             else:
                 break
 
@@ -213,11 +213,11 @@ class SatisfactionSurveys(CursorStream):
         }
         LOGGER.info(f'Starting fetch for {self.name} stopping at {sync_thru}')
         for row in self.cursor_get(self.url, query_params):
-            message = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            curr_synced_thru: str = message[self.replication_key]
+            survey = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru: str = survey[self.replication_key]
             max_synced_thru = max(curr_synced_thru, max_synced_thru)
             if curr_synced_thru > sync_thru:
-                yield(self.stream, message)
+                yield(self.stream, survey)
             else:
                 break
 
