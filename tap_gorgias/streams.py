@@ -178,58 +178,51 @@ class Messages(CursorStream):
             'limit': 100,
             'order_by': 'created_datetime:desc',
         }
-        LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
+        LOGGER.info(f'Starting fetch for {self.name} stopping at {sync_thru}')
         for row in self.cursor_get(self.url, query_params):
             message = {k: self.transform_value(k, v) for (k, v) in row.items()}
             curr_synced_thru: str = message[self.replication_key]
+            max_synced_thru = max(curr_synced_thru, max_synced_thru)
             if curr_synced_thru > sync_thru:
                 yield(self.stream, message)
-                max_synced_thru = max(curr_synced_thru, max_synced_thru)
             else:
                 break
 
         self.update_bookmark(state, max_synced_thru)
 
-class SatisfactionSurveys(Stream):
+class SatisfactionSurveys(CursorStream):
     name = 'satisfaction_surveys'
     replication_method = 'INCREMENTAL'
     replication_key = 'created_datetime'
     key_properties = ['id']
-    url = '/api/satisfaction-surveys?per_page=30&page={}'
+    url = '/api/satisfaction-surveys'
     datetime_fields = set([
         'created_datetime', 'scored_datetime', 'sent_datetime',
         'should_send_datetime'
     ])
     results_key = 'data'
 
-    def paging_get(self, url):
-        next_page = 1
-        total_pages = 1
-
-        while next_page <= total_pages:
-            data = self.client.get(url.format(next_page))
-
-            for record in data.get(self.results_key):
-                yield record
-
-            total_pages = data.get('meta').get('nb_pages') or total_pages
-            next_page += 1
-
     def sync(self, state, config):
+        # https://developers.gorgias.com/reference/get_api-satisfaction-surveys
+
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
-        # surveys are retrieved in descending order based on created_datetime
-        # with no date filtering
-        for row in self.paging_get(self.url):
-            survey = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            curr_synced_thru = survey[self.replication_key]
+        # Since there are no datetime filters available for this endpoint,
+        # sort in descending order and stop when we've reached the bookmark
+        query_params = {
+            'limit': 100,
+            'order_by': 'created_datetime:desc',
+        }
+        LOGGER.info(f'Starting fetch for {self.name} stopping at {sync_thru}')
+        for row in self.cursor_get(self.url, query_params):
+            message = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru: str = message[self.replication_key]
             max_synced_thru = max(curr_synced_thru, max_synced_thru)
             if curr_synced_thru > sync_thru:
-                yield(self.stream, survey)
+                yield(self.stream, message)
             else:
                 break
 
         self.update_bookmark(state, max_synced_thru)
-
 
 class Events(CursorStream):
     name = 'events'
