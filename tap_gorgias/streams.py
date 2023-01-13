@@ -248,6 +248,8 @@ class Events(CursorStream):
     results_key = 'data'    
 
     def sync(self, state, config):
+        # https://developers.gorgias.com/reference/get_api-events
+
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
         # events are ordered in ascending order since we include an order_by query param
         # explicitly limit the time to utcnow
