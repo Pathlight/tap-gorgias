@@ -105,7 +105,8 @@ class CursorStream(Stream):
                 yield record
             next_cursor = data['meta'].get('next_cursor')
 
-class Tickets(Stream):
+
+class Tickets(CursorStream):
     name = 'tickets'
     replication_method = 'INCREMENTAL'
     key_properties = ['id']
@@ -116,40 +117,37 @@ class Tickets(Stream):
         'last_received_message_datetime', 'last_message_datetime', 'closed_datetime',
         'snooze_datetime'
     ])
-    url = '/api/views/{}/items'
     results_key = 'data'
+    url = '/api/tickets'
 
-    def paging_get(self, url):
-
-        while True:  # break occurs in the sync function
-            data = self.client.get(url)
-            for record in data[self.results_key]:
-                yield record
-            url = data['meta']['next_items']
-            LOGGER.info(f'next url for GET: {url}')
-            if not url:
-                break
+    # There are two APIs that return the same data:
+    # 1. the views API, https://developers.gorgias.com/reference/get_api-views
+    # 2. the tickets API, https://developers.gorgias.com/reference/get_api-tickets
 
     def sync(self, state, config):
+        # https://developers.gorgias.com/reference/get_api-tickets
         view_id = config.get(self.view_id_key)
         if not view_id:
+            # This API doesn't require the view ID, but to preserve previous behaviour,
+            # exit when this not provided in the config
             LOGGER.exception(f'No view ID provided for {self.name}')
             return
+
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
-        messages_stream = Messages(self.client)
-
-        url = self.url.format(view_id)
-
-        LOGGER.info(f'starting url for Paging GET: {url}')
-
-        # tickets are retrieved in descending order based on updated_datetime
-        # with no date filtering
-        for row in self.paging_get(url):
-            ticket = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            curr_synced_thru = ticket[self.replication_key]
+        # Since there are no datetime filters available for this endpoint,
+        # sort in descending order and stop when we've reached the bookmark
+        query_params = {
+            'view_id': view_id,
+            'limit': 100,
+            'order_by': 'created_datetime:desc',
+        }
+        LOGGER.info(f'Starting fetch for {self.name} stopping at {sync_thru}')
+        for row in self.cursor_get(self.url, query_params):
+            message = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru: str = message[self.replication_key]
+            max_synced_thru = max(curr_synced_thru, max_synced_thru)
             if curr_synced_thru > sync_thru:
-                yield(self.stream, ticket)
-                max_synced_thru = max(curr_synced_thru, max_synced_thru)
+                yield(self.stream, message)
             else:
                 break
 
@@ -190,6 +188,7 @@ class Messages(CursorStream):
 
         self.update_bookmark(state, max_synced_thru)
 
+
 class SatisfactionSurveys(CursorStream):
     name = 'satisfaction_surveys'
     replication_method = 'INCREMENTAL'
@@ -223,6 +222,7 @@ class SatisfactionSurveys(CursorStream):
                 break
 
         self.update_bookmark(state, max_synced_thru)
+
 
 class Events(CursorStream):
     name = 'events'
