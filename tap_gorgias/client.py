@@ -4,7 +4,8 @@ import requests.exceptions
 import os
 import singer
 import time
-import urllib
+from urllib.parse import ParseResult, parse_qs, urlencode, urlparse, unquote
+from typing import Any, Dict
 
 LOGGER = singer.get_logger()
 
@@ -13,6 +14,18 @@ try:
     DEFAULT_TIMEOUT = int(timeout) if timeout else None
 except (TypeError, ValueError):
     DEFAULT_TIMEOUT = None
+
+def add_url_params(url: str, query_params: Dict[str, Any]) -> str:
+    # Handle urls that already have query params and merge them together with other query_params
+    parsed_url = urlparse(unquote(url))
+    existing_get_args = parse_qs(parsed_url.query)
+    existing_get_args.update(query_params)
+    merged_url_encoded_get_args = urlencode(existing_get_args, doseq=True)
+    # Unquote the url to preserve previous behaviour
+    return unquote(ParseResult(
+        parsed_url.scheme, parsed_url.netloc, parsed_url.path,
+        parsed_url.params, merged_url_encoded_get_args, parsed_url.fragment
+    ).geturl())
 
 class GorgiasAPI:
     URL_TEMPLATE = 'https://{}.gorgias.com'
