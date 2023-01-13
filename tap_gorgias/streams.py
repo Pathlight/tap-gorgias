@@ -150,50 +150,45 @@ class Tickets(Stream):
             if curr_synced_thru > sync_thru:
                 yield(self.stream, ticket)
                 max_synced_thru = max(curr_synced_thru, max_synced_thru)
-                if messages_stream.is_selected():
-                    yield from messages_stream.sync(ticket['id'], sync_thru)
             else:
                 break
 
         self.update_bookmark(state, max_synced_thru)
 
 
-class Messages(Stream):
+class Messages(CursorStream):
     name = 'messages'
     replication_method = 'INCREMENTAL'
     key_properties = ['id']
     replication_key = 'sent_datetime'
-    url = '/api/tickets/{}/messages'
+    url = '/api/messages'
     datetime_fields = set([
         'created_datetime', 'sent_datetime', 'failed_datetime',
         'deleted_datetime', 'opened_datetime'
     ])
     results_key = 'data'
+    
+    def sync(self, state, config):
+        # https://developers.gorgias.com/reference/get_api-messages
 
-    def paging_get(self, url):
-        next_page = 1
-        total_pages = 1
-
-        while next_page <= total_pages:
-            data = self.client.get(url+f'?page={next_page}')
-
-            for record in data.get(self.results_key):
-                yield record
-
-            total_pages = data.get('meta').get('nb_pages') or total_pages
-            next_page += 1
-
-    def sync(self, ticket_id, sync_thru):
-        url = self.url.format(ticket_id)
-        for row in self.paging_get(url):
+        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
+        # Since there are no datetime filters available for this endpoint,
+        # sort in descending order and stop when we've reached the bookmark
+        query_params = {
+            'limit': 100,
+            'order_by': 'created_datetime:desc',
+        }
+        LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
+        for row in self.cursor_get(self.url, query_params):
             message = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            # going to retrieve all messages for each ticket regardless
-            # of when the message was sent to ensure we have a complete
-            # list (including first response time) just in case.
-            # if this slows things down we can revisit
-            yield(self.stream, message)
+            curr_synced_thru: str = message[self.replication_key]
+            if curr_synced_thru > sync_thru:
+                yield(self.stream, message)
+                max_synced_thru = max(curr_synced_thru, max_synced_thru)
+            else:
+                break
 
-        # Since messages is a substream of tickets, we don't write any bookmarks
+        self.update_bookmark(state, max_synced_thru)
 
 class SatisfactionSurveys(Stream):
     name = 'satisfaction_surveys'

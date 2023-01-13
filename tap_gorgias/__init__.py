@@ -13,7 +13,7 @@ from .sync import sync_stream
 
 REQUIRED_CONFIG_KEYS = ["subdomain", "username", "password", "start_date"]
 SUB_STREAMS = {
-    'tickets': ['messages']
+    # 'tickets': ['messages']
 }
 LOGGER = singer.get_logger()
 
