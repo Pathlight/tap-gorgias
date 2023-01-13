@@ -239,8 +239,8 @@ class Events(CursorStream):
         # https://developers.gorgias.com/reference/get_api-events
 
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
-        # events are ordered in ascending order since we include an order_by query param
-        # explicitly limit the time to utcnow
+        # events are ordered in ascending order since we have both order_by and datetime 
+        # query params, explicitly limit the time to utcnow
         query_params = {
             'limit': 100,
             'order_by': 'created_datetime:asc',
