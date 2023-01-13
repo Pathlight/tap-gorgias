@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="tap-gorgias",
-    version="0.1.9",
+    version="0.1.11",
     description="Singer.io tap for extracting data from the Gorgias API",
     author="Pathlight",
     url="https://www.pathlight.com/",
