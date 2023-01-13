@@ -158,7 +158,7 @@ class Messages(CursorStream):
     name = 'messages'
     replication_method = 'INCREMENTAL'
     key_properties = ['id']
-    replication_key = 'sent_datetime'
+    replication_key = 'created_datetime'
     url = '/api/messages'
     datetime_fields = set([
         'created_datetime', 'sent_datetime', 'failed_datetime',
