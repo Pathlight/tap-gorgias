@@ -1,11 +1,11 @@
 import datetime
 import singer
 
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 from singer.utils import strptime_to_utc, strftime as singer_strftime
 
-from tap_gorgias.client import GorgiasAPI
+from tap_gorgias.client import GorgiasAPI, add_url_params
 
 LOGGER = singer.get_logger()
 
@@ -28,6 +28,9 @@ class Stream():
             # Don't need to set the start date to before they're founded
             self.start_date = datetime.datetime(2015, 1, 1).strftime('%Y-%m-%d')
         self.start_date = self.reformat_date_datetimes(self.start_date)
+        self.utcnow_iso: str = self.reformat_date_datetimes(
+            datetime.datetime.now(datetime.timezone.utc).isoformat()
+        )
 
     def is_selected(self):
         return self.stream is not None
@@ -71,6 +74,36 @@ class Stream():
         max_synced_thru: str = max(sync_thru, self.start_date)
         return sync_thru, max_synced_thru
 
+
+class CursorStream(Stream):
+    def cursor_get(self, url: str, query_params: Dict[str, Any]):
+        """ Paginate through the streams list response via the provided cursors. """
+        updated_url = add_url_params(url, query_params)
+        cursors_seen = set()
+        def _get_page(cursor=None):
+            cursors_seen.add(cursor)
+            # Since the URL doesn't change, don't make logs on each request
+            if not cursor:
+                return self.client.get(updated_url, make_log_on_request=True)
+            return self.client.get(f'{updated_url}&cursor={cursor}', make_log_on_request=False)
+        
+        next_cursor = None
+        while next_cursor not in cursors_seen:
+            # pass an empty cursor to begin
+            data = _get_page(next_cursor)
+            records = data.get(self.results_key)
+            try:
+                # For each page, log the date range of this page
+                page_start_date, page_end_date = (
+                    records[0][self.replication_key],
+                    records[-1][self.replication_key]
+                )
+                LOGGER.info(f'Fetched {self.name} between {page_start_date} and {page_end_date}')
+            except:
+                pass
+            for record in records:
+                yield record
+            next_cursor = data['meta'].get('next_cursor')
 
 class Tickets(Stream):
     name = 'tickets'
@@ -203,55 +236,29 @@ class SatisfactionSurveys(Stream):
         self.update_bookmark(state, max_synced_thru)
 
 
-class Events(Stream):
+class Events(CursorStream):
     name = 'events'
     replication_method = 'INCREMENTAL'
     replication_key = 'created_datetime'
     key_properties = ['id']
-    url = '/api/events?limit=100&order_by=created_datetime:asc'
+    url = '/api/events'
     datetime_fields = set([
         'created_datetime',
     ])
-    results_key = 'data'
-
-    def cursor_get(self, url, bookmark_date):
-        """ Paginate through the events list response via the provided cursors. """
-        cursors_seen = set()
-        # Events can keep coming in while we're making requests so limit the range to utcnow
-        utcnow_iso: str = self.reformat_date_datetimes(
-            datetime.datetime.now(datetime.timezone.utc).isoformat()
-        )
-        url = f'{url}&created_datetime[gt]={bookmark_date}&created_datetime[lt]={utcnow_iso}'
-        LOGGER.info(f'Fetching {self.name} between {bookmark_date} and {utcnow_iso}')
-        def _get_page(cursor=None):
-            cursors_seen.add(cursor)
-            # Since the URL doesn't change, don't make logs on each request
-            if not cursor:
-                return self.client.get(url, make_log_on_request=False)
-            return self.client.get(f'{url}&cursor={cursor}', make_log_on_request=False)
-        
-        next_cursor = None
-        while next_cursor not in cursors_seen:
-            # pass an empty cursor to begin
-            data = _get_page(next_cursor)
-            records = data.get(self.results_key)
-            try:
-                # For each page, log the date range of this page
-                page_start_date, page_end_date = (
-                    records[0][self.replication_key],
-                    records[-1][self.replication_key]
-                )
-                LOGGER.info(f'Fetched {self.name} between {page_start_date} and {page_end_date}')
-            except:
-                pass
-            for record in records:
-                yield record
-            next_cursor = data['meta'].get('next_cursor')
+    results_key = 'data'    
 
     def sync(self, state, config):
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
         # events are ordered in ascending order since we include an order_by query param
-        for row in self.cursor_get(self.url, sync_thru):
+        # explicitly limit the time to utcnow
+        query_params = {
+            'limit': 100,
+            'order_by': 'created_datetime:asc',
+            'created_datetime[gt]': sync_thru,
+            'created_datetime[lt]': self.utcnow_iso,
+        }
+        LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
+        for row in self.cursor_get(self.url, query_params):
             event = {k: self.transform_value(k, v) for (k, v) in row.items()}
             curr_synced_thru: str = event[self.replication_key]
             max_synced_thru: str = max(curr_synced_thru, max_synced_thru)
