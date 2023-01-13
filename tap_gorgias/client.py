@@ -41,6 +41,7 @@ class GorgiasAPI:
                 timeout=DEFAULT_TIMEOUT
             )
             try:
+                # https://developers.gorgias.com/reference/limitations
                 resp.raise_for_status()
             except requests.exceptions.RequestException:
                 if resp.status_code == 429 and num_retries < self.MAX_RETRIES:
