@@ -1,9 +1,11 @@
 import datetime
-import pytz
 import singer
+
+from typing import Tuple
 
 from singer.utils import strptime_to_utc, strftime as singer_strftime
 
+from tap_gorgias.client import GorgiasAPI
 
 LOGGER = singer.get_logger()
 
@@ -18,28 +20,56 @@ class Stream():
     url = None
     results_key = None
 
-    def __init__(self, client=None, start_date=None):
-        self.client = client
+    def __init__(self, client: GorgiasAPI, start_date=None):
+        self.client: GorgiasAPI = client
         if start_date:
             self.start_date = start_date
         else:
-            self.start_date = datetime.datetime.min.strftime('%Y-%m-%d')
+            # Don't need to set the start date to before they're founded
+            self.start_date = datetime.datetime(2015, 1, 1).strftime('%Y-%m-%d')
+        self.start_date = self.reformat_date_datetimes(self.start_date)
 
     def is_selected(self):
         return self.stream is not None
 
     def update_bookmark(self, state, value):
+        if not value:
+            return
         current_bookmark = singer.get_bookmark(state, self.name, self.replication_key)
-        if value and value > current_bookmark:
+        if value > current_bookmark:
             singer.write_bookmark(state, self.name, self.replication_key, value)
+        else:
+            LOGGER.info(f'bookmark not updating for {self.name}: current_bookmark={current_bookmark}, value={value}')
 
-    def transform_value(self, key, value):
-        if key in self.datetime_fields and value:
+    def reformat_date_datetimes(self, value: str) -> str:
+        if value:
             value = strptime_to_utc(value)
             # reformat to use RFC3339 format
             value = singer_strftime(value)
-
         return value
+
+    def transform_value(self, key: str, value: str) -> str:
+        if key in self.datetime_fields and value:
+            value = self.reformat_date_datetimes(value)
+        return value
+
+    def get_sync_thru_dates(self, state: dict) -> Tuple[str, str]:
+        """
+        Helper method that gets the bookmark and
+        Returns:
+            sync_thru (str): the bookmark date or the start date in RFC3339 format
+            max_synced_thru (str): the date at which syncing should start from in RFC3339 format
+        """
+        try:
+            sync_thru: str = singer.get_bookmark(state, self.name, self.replication_key)
+        except TypeError:
+            sync_thru: str = self.start_date
+
+        # Transform the times with the appropriate format so that our comparisons
+        # of these values are correct
+        sync_thru: str = self.reformat_date_datetimes(sync_thru)
+        max_synced_thru: str = max(sync_thru, self.start_date)
+        return sync_thru, max_synced_thru
 
 
 class Tickets(Stream):
@@ -72,14 +102,7 @@ class Tickets(Stream):
         if not view_id:
             LOGGER.exception(f'No view ID provided for {self.name}')
             return
-
-        try:
-            sync_thru = singer.get_bookmark(state, self.name, self.replication_key)
-        except TypeError:
-            sync_thru = self.start_date
-
-        max_synced_thru = max(sync_thru, self.start_date)
-
+        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
         messages_stream = Messages(self.client)
 
         url = self.url.format(view_id)
@@ -137,6 +160,7 @@ class Messages(Stream):
             # if this slows things down we can revisit
             yield(self.stream, message)
 
+        # Since messages is a substream of tickets, we don't write any bookmarks
 
 class SatisfactionSurveys(Stream):
     name = 'satisfaction_surveys'
@@ -164,14 +188,7 @@ class SatisfactionSurveys(Stream):
             next_page += 1
 
     def sync(self, state, config):
-        try:
-            sync_thru = singer.get_bookmark(state, self.name, self.replication_key)
-        except TypeError:
-            sync_thru = self.start_date
-        sync_thru = self.transform_value('date', sync_thru)
-
-        max_synced_thru = max(sync_thru, self.start_date)
-
+        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
         # surveys are retrieved in descending order based on created_datetime
         # with no date filtering
         for row in self.paging_get(self.url):
@@ -200,42 +217,45 @@ class Events(Stream):
     def cursor_get(self, url, bookmark_date):
         """ Paginate through the events list response via the provided cursors. """
         cursors_seen = set()
-        url = f'{url}&created_datetime[gt]={bookmark_date}'
+        # Events can keep coming in while we're making requests so limit the range to utcnow
+        utcnow_iso: str = self.reformat_date_datetimes(
+            datetime.datetime.now(datetime.timezone.utc).isoformat()
+        )
+        url = f'{url}&created_datetime[gt]={bookmark_date}&created_datetime[lt]={utcnow_iso}'
+        LOGGER.info(f'Fetching {self.name} between {bookmark_date} and {utcnow_iso}')
         def _get_page(cursor=None):
             cursors_seen.add(cursor)
+            # Since the URL doesn't change, don't make logs on each request
             if not cursor:
-                return self.client.get(url)
-            return self.client.get(f'{url}&cursor={cursor}')
-
+                return self.client.get(url, make_log_on_request=False)
+            return self.client.get(f'{url}&cursor={cursor}', make_log_on_request=False)
+        
         next_cursor = None
         while next_cursor not in cursors_seen:
             # pass an empty cursor to begin
             data = _get_page(next_cursor)
-            for record in data.get(self.results_key):
+            records = data.get(self.results_key)
+            try:
+                # For each page, log the date range of this page
+                page_start_date, page_end_date = (
+                    records[0][self.replication_key],
+                    records[-1][self.replication_key]
+                )
+                LOGGER.info(f'Fetched {self.name} between {page_start_date} and {page_end_date}')
+            except:
+                pass
+            for record in records:
                 yield record
             next_cursor = data['meta'].get('next_cursor')
 
     def sync(self, state, config):
-        try:
-            sync_thru = singer.get_bookmark(state, self.name, self.replication_key)
-        except TypeError:
-            sync_thru = self.start_date
-
-        sync_thru = self.transform_value('date', sync_thru)
-
-        max_synced_thru = max(sync_thru, self.start_date)
-
-        # surveys are retrieved in descending order based on created_datetime
-        # with no date filtering
+        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
+        # events are ordered in ascending order since we include an order_by query param
         for row in self.cursor_get(self.url, sync_thru):
             event = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            curr_synced_thru = event[self.replication_key]
-            max_synced_thru = max(curr_synced_thru, max_synced_thru)
-            if curr_synced_thru > sync_thru:
-                yield(self.stream, event)
-            else:
-                break
-
+            curr_synced_thru: str = event[self.replication_key]
+            max_synced_thru: str = max(curr_synced_thru, max_synced_thru)
+            yield (self.stream, event)
         self.update_bookmark(state, max_synced_thru)
 
 
