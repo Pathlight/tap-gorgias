@@ -24,7 +24,7 @@ class GorgiasAPI:
         self.subdomain = config['subdomain']
         self.base_url = self.URL_TEMPLATE.format(self.subdomain)
 
-    def get(self, url):
+    def get(self, url, make_log_on_request: bool=True):
         if not url:
             LOGGER.info(f'gorgias get request attempted, but no url passed through')
             return {}
@@ -33,7 +33,8 @@ class GorgiasAPI:
             url = f'{self.base_url}{url}'
 
         for num_retries in range(self.MAX_RETRIES):
-            LOGGER.info(f'gorgias get request {url}, timeout={DEFAULT_TIMEOUT}')
+            if make_log_on_request:
+                LOGGER.info(f'gorgias get request {url}, timeout={DEFAULT_TIMEOUT}')
             resp = requests.get(
                 url,
                 auth=(self.username, self.password),
