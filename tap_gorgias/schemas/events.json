@@ -58,7 +58,37 @@
             "type":[
                 "null",
                 "object"
-            ]
+            ],
+            "additionalProperties":false,
+            "properties":{
+                "call":{
+                    "type":[
+                        "null",
+                        "object"
+                    ],
+                    "additionalProperties":false,
+                    "properties":{
+                        "recording_url":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        },
+                        "recording_duration":{
+                            "type":[
+                                "null",
+                                "integer"
+                            ]
+                        },
+                        "gorgias_recording_url":{
+                            "type":[
+                                "null",
+                                "string"
+                            ]
+                        }
+                    }
+                }
+            }
         }
     }
 }
