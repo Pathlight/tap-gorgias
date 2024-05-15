@@ -1,76 +1,76 @@
 {
-    "type":[
+    "type": [
         "null",
         "object"
     ],
-    "additionalProperties":false,
-    "properties":{
-        "id":{
-            "type":[
+    "additionalProperties": false,
+    "properties": {
+        "id": {
+            "type": [
                 "null",
                 "integer"
             ]
         },
-        "body_text":{
-            "type":[
+        "body_text": {
+            "type": [
                 "null",
                 "string"
             ]
         },
-        "created_datetime":{
-            "type":[
+        "created_datetime": {
+            "type": [
                 "null",
                 "string"
             ],
-            "format":"date-time"
+            "format": "date-time"
         },
-        "customer_id":{
-            "type":[
+        "customer_id": {
+            "type": [
                 "null",
                 "integer"
             ]
         },
-        "meta":{
-            "type":[
+        "meta": {
+            "type": [
                 "null",
-                "object"
+                "string"
             ]
         },
-        "score":{
-            "type":[
+        "score": {
+            "type": [
                 "null",
                 "integer"
             ]
         },
-        "scored_datetime":{
-            "type":[
+        "scored_datetime": {
+            "type": [
                 "null",
                 "string"
             ],
-            "format":"date-time"
+            "format": "date-time"
         },
-        "sent_datetime":{
-            "type":[
+        "sent_datetime": {
+            "type": [
                 "null",
                 "string"
             ],
-            "format":"date-time"
+            "format": "date-time"
         },
-        "should_send_datetime":{
-            "type":[
+        "should_send_datetime": {
+            "type": [
                 "null",
                 "string"
             ],
-            "format":"date-time"
+            "format": "date-time"
         },
-        "ticket_id":{
-            "type":[
+        "ticket_id": {
+            "type": [
                 "null",
                 "integer"
             ]
         },
-        "uri":{
-            "type":[
+        "uri": {
+            "type": [
                 "null",
                 "string"
             ]
