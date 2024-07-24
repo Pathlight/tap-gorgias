@@ -83,10 +83,15 @@ class CursorStream(Stream):
         def _get_page(cursor=None):
             cursors_seen.add(cursor)
             # Since the URL doesn't change, don't make logs on each request
-            if not cursor:
-                return self.client.get(updated_url, make_log_on_request=True)
-            return self.client.get(f'{updated_url}&cursor={cursor}', make_log_on_request=False)
-        
+            if cursor:
+                # Check if the URL already has query parameters
+                separator = '&' if '?' in updated_url else '?'
+                request_url = f"{updated_url}{separator}cursor={cursor}"
+            else:
+                request_url = updated_url
+
+            return self.client.get(request_url, make_log_on_request=not cursor)
+
         next_cursor = None
         while next_cursor not in cursors_seen:
             # pass an empty cursor to begin
@@ -165,7 +170,6 @@ class Messages(CursorStream):
         'deleted_datetime', 'opened_datetime'
     ])
     results_key = 'data'
-    
     def sync(self, state, config):
         # https://developers.gorgias.com/reference/get_api-messages
 
@@ -233,13 +237,13 @@ class Events(CursorStream):
     datetime_fields = set([
         'created_datetime',
     ])
-    results_key = 'data'    
+    results_key = 'data'
 
     def sync(self, state, config):
         # https://developers.gorgias.com/reference/get_api-events
 
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
-        # events are ordered in ascending order since we have both order_by and datetime 
+        # events are ordered in ascending order since we have both order_by and datetime
         # query params, explicitly limit the time to utcnow
         query_params = {
             'limit': 100,
@@ -255,10 +259,80 @@ class Events(CursorStream):
             yield (self.stream, event)
         self.update_bookmark(state, max_synced_thru)
 
+class VoiceCallEvents(CursorStream):
+    name = 'voice_call_events'
+    replication_method = 'INCREMENTAL'
+    key_properties = ['id']
+    replication_key = 'created_datetime'
+    datetime_fields = set(['created_datetime'])
+    results_key = 'data'
+    url = '/api/phone/voice-call-events'
+
+    def sync(self, state, config):
+        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
+        # API does not accept query parameters as of July 24, 2024.
+        # Check https://developers.gorgias.com/reference/list-voice-call-events for updates
+        query_params = {}
+        LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
+        for row in self.cursor_get(self.url, query_params):
+            event = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru: str = event[self.replication_key]
+            max_synced_thru = max(curr_synced_thru, max_synced_thru)
+            yield (self.stream, event)
+        self.update_bookmark(state, max_synced_thru)
+
+
+class VoiceCallRecordings(CursorStream):
+    name = 'voice_call_recordings'
+    replication_method = 'INCREMENTAL'
+    key_properties = ['id']
+    replication_key = 'created_datetime'
+    datetime_fields = set(['created_datetime'])
+    results_key = 'data'
+    url = '/api/phone/voice-call-recordings'
+
+    def sync(self, state, config):
+        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
+        # API does not accept query parameters as of July 24, 2024.
+        # Check https://developers.gorgias.com/reference/list-voice-call-recordings for updates
+        query_params = {}
+        LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
+        for row in self.cursor_get(self.url, query_params):
+            recording = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru: str = recording[self.replication_key]
+            max_synced_thru = max(curr_synced_thru, max_synced_thru)
+            yield (self.stream, recording)
+        self.update_bookmark(state, max_synced_thru)
+
+
+class VoiceCalls(CursorStream):
+    name = 'voice_calls'
+    replication_method = 'INCREMENTAL'
+    key_properties = ['id']
+    replication_key = 'created_datetime'
+    datetime_fields = set(['created_datetime', 'started_datetime', 'updated_datetime'])
+    results_key = 'data'
+    url = '/api/phone/voice-calls'
+
+    def sync(self, state, config):
+        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
+        # API does not accept query parameters as of July 24, 2024.
+        # Check https://developers.gorgias.com/reference/list-voice-calls for updates
+        query_params = {}
+        LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
+        for row in self.cursor_get(self.url, query_params):
+            call = {k: self.transform_value(k, v) for (k, v) in row.items()}
+            curr_synced_thru: str = call[self.replication_key]
+            max_synced_thru = max(curr_synced_thru, max_synced_thru)
+            yield (self.stream, call)
+        self.update_bookmark(state, max_synced_thru)
 
 STREAMS = {
     "events": Events,
     "tickets": Tickets,
     "messages": Messages,
-    "satisfaction_surveys": SatisfactionSurveys
+    "satisfaction_surveys": SatisfactionSurveys,
+    "voice_call_events": VoiceCallEvents,
+    "voice_call_recordings": VoiceCallRecordings,
+    "voice_calls": VoiceCalls
 }

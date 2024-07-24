@@ -1,0 +1,81 @@
+{
+  "type": [
+    "null",
+    "object"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the voicemail or call recording."
+    },
+    "call_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the voice call the voicemail or call recording belongs to."
+    },
+    "external_id": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "ID of the voicemail or call recording on the provider side (Twilio, etc...)."
+    },
+    "url": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "Voicemail or call recording direct access URL."
+    },
+    "duration": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "Duration in seconds of the voicemail or call recording."
+    },
+    "type": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "Whether this is a voicemail or a call recording."
+    },
+    "created_datetime": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time",
+      "description": "When the voicemail or call recording was created."
+    },
+    "deleted_datetime": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time",
+      "description": "When the voicemail or call recording was deleted, if deleted."
+    },
+    "deleted_by_user_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "Which agent deleted the voicemail or call recording, if deleted."
+    },
+    "error_code": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "Reason why the URL could not be provided."
+    }
+  }
+}

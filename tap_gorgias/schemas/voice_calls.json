@@ -1,0 +1,159 @@
+{
+  "type": [
+    "null",
+    "object"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the voice call."
+    },
+    "integration_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the voice integration that managed the voice call."
+    },
+    "ticket_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the ticket the voice call belongs to."
+    },
+    "phone_number_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the phone number that received or performed the voice call."
+    },
+    "external_id": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "ID of the voice call on the provider side (Twilio, etc...)."
+    },
+    "provider": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "The voice solutions provider handling the voice call. It provides the external_id."
+    },
+    "status": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "The current status of the voice call."
+    },
+    "direction": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "Whether the voice call is received from a customer (inbound) or addressed to a customer (outbound)."
+    },
+    "phone_number_source": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "The phone number performing the voice call."
+    },
+    "country_source": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "The country code of the phone number performing the voice call."
+    },
+    "phone_number_destination": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "The phone number receiving the voice call."
+    },
+    "country_destination": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "description": "The country code of the phone number receiving the voice call."
+    },
+    "duration": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "Duration in seconds of the voice call."
+    },
+    "started_datetime": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time",
+      "description": "When the voice call started on the provider side."
+    },
+    "created_datetime": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time",
+      "description": "When the voice call was created in Gorgias."
+    },
+    "updated_datetime": {
+      "type": [
+        "null",
+        "string"
+      ],
+      "format": "date-time",
+      "description": "When the voice call was last updated."
+    },
+    "initiated_by_agent_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "The agent that initiated the voice call, only for outbound calls."
+    },
+    "last_answered_by_agent_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "The last agent that answered the voice call, only for inbound calls."
+    },
+    "customer_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "For inbound calls, the customer that initiated the voice call. For outbound calls, the customer that received the voice call."
+    },
+    "has_voicemail": {
+      "type": [
+        "null",
+        "boolean"
+      ],
+      "description": "Whether the voice call has a voicemail attached."
+    },
+    "has_call_recording": {
+      "type": [
+        "null",
+        "boolean"
+      ],
+      "description": "Whether the voice call has a call recording attached."
+    }
+  }
+}
