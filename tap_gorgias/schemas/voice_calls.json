@@ -7,7 +7,6 @@
   "properties": {
     "id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "ID of the voice call."
@@ -28,7 +27,6 @@
     },
     "phone_number_id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "ID of the phone number that received or performed the voice call."
@@ -56,7 +54,6 @@
     },
     "direction": {
       "type": [
-        "null",
         "string"
       ],
       "description": "Whether the voice call is received from a customer (inbound) or addressed to a customer (outbound)."
@@ -98,7 +95,6 @@
     },
     "started_datetime": {
       "type": [
-        "null",
         "string"
       ],
       "format": "date-time",
@@ -106,7 +102,6 @@
     },
     "created_datetime": {
       "type": [
-        "null",
         "string"
       ],
       "format": "date-time",
@@ -136,7 +131,6 @@
     },
     "customer_id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "For inbound calls, the customer that initiated the voice call. For outbound calls, the customer that received the voice call."

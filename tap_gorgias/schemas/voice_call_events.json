@@ -7,28 +7,24 @@
   "properties": {
     "id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "ID of the event."
     },
     "type": {
       "type": [
-        "null",
         "string"
       ],
       "description": "The voice call event type."
     },
     "account_id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "ID of the account the event belongs to."
     },
     "call_id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "ID of the call for which the event happened."
@@ -49,7 +45,6 @@
     },
     "created_datetime": {
       "type": [
-        "null",
         "string"
       ],
       "format": "date-time",
