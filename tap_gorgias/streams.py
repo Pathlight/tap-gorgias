@@ -272,6 +272,7 @@ class VoiceCallEvents(CursorStream):
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
         # API does not accept query parameters as of July 24, 2024.
         # Check https://developers.gorgias.com/reference/list-voice-call-events for updates
+        # Default ordering is ascending
         query_params = {}
         LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
         for row in self.cursor_get(self.url, query_params):
@@ -301,6 +302,10 @@ class VoiceCallRecordings(CursorStream):
             recording = {k: self.transform_value(k, v) for (k, v) in row.items()}
             curr_synced_thru: str = recording[self.replication_key]
             max_synced_thru = max(curr_synced_thru, max_synced_thru)
+            # Stop fetching if the current record is older than or equal to the bookmark
+            if curr_synced_thru <= sync_thru:
+                LOGGER.info(f'Stopping fetch at {curr_synced_thru} as it is older than or equal to bookmark {sync_thru}')
+                break
             yield (self.stream, recording)
         self.update_bookmark(state, max_synced_thru)
 
@@ -324,6 +329,10 @@ class VoiceCalls(CursorStream):
             call = {k: self.transform_value(k, v) for (k, v) in row.items()}
             curr_synced_thru: str = call[self.replication_key]
             max_synced_thru = max(curr_synced_thru, max_synced_thru)
+            # Stop fetching if the current record is older than or equal to the bookmark
+            if curr_synced_thru <= sync_thru:
+                LOGGER.info(f'Stopping fetch at {curr_synced_thru} as it is older than or equal to bookmark {sync_thru}')
+                break
             yield (self.stream, call)
         self.update_bookmark(state, max_synced_thru)
 
