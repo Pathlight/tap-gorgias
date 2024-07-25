@@ -130,7 +130,7 @@ def discover():
     for stream_id, schema in raw_schemas.items():
         key_properties = ['id']
         valid_replication_keys = []
-        if stream_id in ['messages', 'satisfaction_survey']:
+        if stream_id in ['messages', 'satisfaction_survey', 'voice_calls', 'voice_call_events', 'voice_call_recordings']:
             valid_replication_keys.append('created_datetime')
         elif stream_id == 'tickets':
             valid_replication_keys.append('updated_datetime')

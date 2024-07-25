@@ -1,0 +1,62 @@
+{
+  "type": [
+    "null",
+    "object"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": [
+        "integer"
+      ],
+      "description": "ID of the event."
+    },
+    "type": {
+      "type": [
+        "string"
+      ],
+      "description": "The voice call event type."
+    },
+    "account_id": {
+      "type": [
+        "integer"
+      ],
+      "description": "ID of the account the event belongs to."
+    },
+    "call_id": {
+      "type": [
+        "integer"
+      ],
+      "description": "ID of the call for which the event happened."
+    },
+    "user_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the agent related to the event."
+    },
+    "customer_id": {
+      "type": [
+        "null",
+        "integer"
+      ],
+      "description": "ID of the customer related to the event."
+    },
+    "created_datetime": {
+      "type": [
+        "string"
+      ],
+      "format": "date-time",
+      "description": "When the event was created."
+    },
+    "meta": {
+      "type": [
+        "null",
+        "object"
+      ],
+      "additionalProperties": false,
+      "properties": {}
+    }
+  }
+}
