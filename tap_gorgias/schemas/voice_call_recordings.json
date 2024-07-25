@@ -7,14 +7,12 @@
   "properties": {
     "id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "ID of the voicemail or call recording."
     },
     "call_id": {
       "type": [
-        "null",
         "integer"
       ],
       "description": "ID of the voice call the voicemail or call recording belongs to."
@@ -42,14 +40,12 @@
     },
     "type": {
       "type": [
-        "null",
         "string"
       ],
       "description": "Whether this is a voicemail or a call recording."
     },
     "created_datetime": {
       "type": [
-        "null",
         "string"
       ],
       "format": "date-time",
