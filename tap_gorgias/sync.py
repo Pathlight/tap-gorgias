@@ -10,13 +10,14 @@ def sync_stream(state, start_date, instance, config):
     stream = instance.stream
     mdata = stream.metadata
 
-    # If we have a bookmark, use it; otherwise use start_date & update bookmark with it
-    if (instance.replication_method == 'INCREMENTAL' and
-            not state.get('bookmarks', {}).get(stream.tap_stream_id, {}).get(instance.replication_key)):
-        singer.write_bookmark(state,
-                              stream.tap_stream_id,
-                              instance.replication_key,
-                              start_date)
+    current_bookmark = state.get('bookmarks', {}).get(stream.tap_stream_id, {}).get(instance.replication_key)
+    # If we have a bookmark, use it; otherwise use start_date for streams that don't use cursor bookmarks
+    if (
+        not instance.uses_cursor_bookmark and
+        not current_bookmark and
+        instance.replication_method == 'INCREMENTAL'
+    ):
+        singer.write_bookmark(state, stream.tap_stream_id, instance.replication_key, start_date)
 
     parent_stream = stream
     with metrics.record_counter(stream.tap_stream_id) as counter:
