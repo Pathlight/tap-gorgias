@@ -91,7 +91,10 @@ class CursorStream:
                 new_url = add_url_params(url, {**query_params, "cursor": cursor})
             else:
                 new_url = updated_url
-            return self.client.get(new_url, make_log_on_request=True)
+            log_on_request = cursor is None
+            if self.uses_cursor_bookmark:
+                log_on_request = True
+            return self.client.get(new_url, make_log_on_request=log_on_request)
 
         next_cursor = query_params.get("cursor")
         if next_cursor:
