@@ -10,9 +10,10 @@ from tap_gorgias.client import GorgiasAPI, add_url_params
 LOGGER = singer.get_logger()
 
 
-class Stream():
+class CursorStream:
     name = None
     replication_method = None
+    replication_key = None
     key_properties = None
     stream = None
     view_id_key = None
@@ -32,6 +33,11 @@ class Stream():
             datetime.datetime.now(datetime.timezone.utc).isoformat()
         )
 
+    @property
+    def uses_cursor_bookmark(self):
+        # TODO: update all the other streams to bookmark the cursor
+        return self.replication_key == "cursor"
+
     def is_selected(self):
         return self.stream is not None
 
@@ -39,7 +45,7 @@ class Stream():
         if not value:
             return
         current_bookmark = singer.get_bookmark(state, self.name, self.replication_key)
-        if value > current_bookmark:
+        if self.uses_cursor_bookmark or value > current_bookmark:
             singer.write_bookmark(state, self.name, self.replication_key, value)
         else:
             LOGGER.info(f'bookmark not updating for {self.name}: current_bookmark={current_bookmark}, value={value}')
@@ -74,8 +80,6 @@ class Stream():
         max_synced_thru: str = max(sync_thru, self.start_date)
         return sync_thru, max_synced_thru
 
-
-class CursorStream(Stream):
     def cursor_get(self, url: str, query_params: Dict[str, Any]):
         """ Paginate through the streams list response via the provided cursors. """
         updated_url = add_url_params(url, query_params)
@@ -84,15 +88,21 @@ class CursorStream(Stream):
             cursors_seen.add(cursor)
             # Since the URL doesn't change, don't make logs on each request
             if cursor:
-                # Check if the URL already has query parameters
-                separator = '&' if '?' in updated_url else '?'
-                request_url = f"{updated_url}{separator}cursor={cursor}"
+                new_url = add_url_params(url, {**query_params, "cursor": cursor})
             else:
-                request_url = updated_url
+                new_url = updated_url
+            log_on_request = cursor is None
+            if self.uses_cursor_bookmark:
+                log_on_request = True
+            return self.client.get(new_url, make_log_on_request=log_on_request)
 
-            return self.client.get(request_url, make_log_on_request=not cursor)
+        next_cursor = query_params.get("cursor")
+        if next_cursor:
+            # When we have a bookmark and we reach the end, the next_cursor is None. However, this is the first time we're
+            # seeing it, so it'll loop back all the way to the beginning. Prevent this by adding None i.e we've already already
+            # seen the starting point
+            cursors_seen.add(None)
 
-        next_cursor = None
         while next_cursor not in cursors_seen:
             # pass an empty cursor to begin
             data = _get_page(next_cursor)
@@ -106,8 +116,12 @@ class CursorStream(Stream):
                 LOGGER.info(f'Fetched {self.name} between {page_start_date} and {page_end_date}')
             except:
                 pass
+
             for record in records:
-                yield record
+                if self.uses_cursor_bookmark:
+                    yield (record, next_cursor)
+                else:
+                    yield record
             next_cursor = data['meta'].get('next_cursor')
 
 
@@ -263,24 +277,27 @@ class VoiceCallEvents(CursorStream):
     name = 'voice_call_events'
     replication_method = 'INCREMENTAL'
     key_properties = ['id']
-    replication_key = 'created_datetime'
+    replication_key = 'cursor'
     datetime_fields = set(['created_datetime'])
     results_key = 'data'
     url = '/api/phone/voice-call-events'
 
     def sync(self, state, config):
-        sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
-        # API does not accept query parameters as of July 24, 2024.
         # Check https://developers.gorgias.com/reference/list-voice-call-events for updates
-        # Default ordering is ascending
-        query_params = {}
-        LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
-        for row in self.cursor_get(self.url, query_params):
+        # Default ordering is ascending with option of specifying order, but we can use the cursors as bookmarks
+        current_bookmark = singer.get_bookmark(state, self.name, self.replication_key)
+        query_params = {'limit': 100}
+        if current_bookmark:
+            query_params['cursor'] = current_bookmark
+
+        LOGGER.info(f'Starting fetch for {self.name} at cursor {current_bookmark}')
+        cursor = None
+        for row, cursor in self.cursor_get(self.url, query_params):
             event = {k: self.transform_value(k, v) for (k, v) in row.items()}
-            curr_synced_thru: str = event[self.replication_key]
-            max_synced_thru = max(curr_synced_thru, max_synced_thru)
             yield (self.stream, event)
-        self.update_bookmark(state, max_synced_thru)
+
+        if cursor:
+            self.update_bookmark(state, cursor)
 
 
 class VoiceCallRecordings(CursorStream):
@@ -294,9 +311,10 @@ class VoiceCallRecordings(CursorStream):
 
     def sync(self, state, config):
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
-        # API does not accept query parameters as of July 24, 2024.
         # Check https://developers.gorgias.com/reference/list-voice-call-recordings for updates
-        query_params = {}
+        query_params = {
+            'limit': 100,
+        }
         LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
         for row in self.cursor_get(self.url, query_params):
             recording = {k: self.transform_value(k, v) for (k, v) in row.items()}
@@ -321,9 +339,10 @@ class VoiceCalls(CursorStream):
 
     def sync(self, state, config):
         sync_thru, max_synced_thru = self.get_sync_thru_dates(state)
-        # API does not accept query parameters as of July 24, 2024.
         # Check https://developers.gorgias.com/reference/list-voice-calls for updates
-        query_params = {}
+        query_params = {
+            'limit': 100,
+        }
         LOGGER.info(f'Starting fetch for {self.name} between {sync_thru} and {self.utcnow_iso}')
         for row in self.cursor_get(self.url, query_params):
             call = {k: self.transform_value(k, v) for (k, v) in row.items()}
